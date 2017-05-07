@@ -8,44 +8,54 @@ import math
 import operator
 import json
 from sklearn.decomposition import PCA
-
+from pymongo import MongoClient
+client=MongoClient()
+client = MongoClient('mongodb://localhost:27017')
+db = client['pymongo_test']
+posts=db.posts
+post_data={
+	'id':'test123',
+	'test':'this is just a test phrase'
+}
+result=posts.insert_one(post_data)
+print('One post: {0}'.format(result.inserted_id)) 
 #trying to answer the question what makes a movie good?
 
 
-
+bills_post = posts.find_one({'id': 'test123'})
+print(bills_post)
 #print(df1)
 # def createCSV(data_frame,filename):
 #     data_frame.columns=["director_name","num_critic_for_reviews","duration","director_facebook_likes","actor_2_name","actor_1_facebook_likes","gross","genres","actor_1_name","movie_title","num_voted_users","cast_total_facebook_likes","plot_keywords","num_user_for_reviews","language","country","content_rating","budget","title_year","actor_2_facebook_likes","imdb_score","movie_facebook_likes"]
 #     fileName=filename+".csv"
 #     data_frame.to_csv(fileName,sep=',')
 
-def parseGenres(df1):
-	idx=1
-	res=[]
-	di={}
-	# di={'Action':1,'Adventure':2,'Sci-Fi':3,'Romance':4,'Comedy':5,'Horror':6,'Drama':7,'Thriller':8,'Documentary':9}
-	allg=list(df1['genres'])
-	#print len(df1)
-	for i in range(len(allg)):
-		s=allg[i]
-		g=s.split('|')
-		num=0
-		for j in range(len(g)):
-			key=g[j]
-			if di.has_key(key):
+# def parseGenres(df1):
+# 	idx=1
+# 	res=[]
+# 	di={}
+# 	# di={'Action':1,'Adventure':2,'Sci-Fi':3,'Romance':4,'Comedy':5,'Horror':6,'Drama':7,'Thriller':8,'Documentary':9}
+# 	allg=list(df1['genres'])
+# 	#print len(df1)
+# 	for i in range(len(allg)):
+# 		s=allg[i]
+# 		g=s.split('|')
+# 		num=0
+# 		for j in range(len(g)):
+# 			key=g[j]
+# 			if di.has_key(key):
 
-				# num=num*10+di[key]
-			else:
-				
-				di[key]=idx
-				idx+=1
-				# num=num*10		
-		res.append(num)
-	print "total genres:"+str(idx)
-	df1.drop(['genres'],1)
-	df1['genres']=res
-	#print di.keys()
-	return df1
+# 				# num=num*10+di[key]
+# 			else:
+# 				di[key]=idx
+# 				idx+=1
+# 				# num=num*10		
+# 		res.append(num)
+# 	print "total genres:"+str(idx)
+# 	df1.drop(['genres'],1)
+# 	df1['genres']=res
+# 	#print di.keys()
+# 	return df1
 
 
 def rankMovies(df): #ranking movies based on imdb score
@@ -125,6 +135,8 @@ def createDirScore(df1):
  	print df1.ix[df1["rank"]==4,"direc"]
  	return df1
 
+
+
 def prepData():
 	df=pd.read_csv("movie_metadata.csv",header=0)
 	headers=["director_name","num_critic_for_reviews","duration","gross","genres","actor_1_name","movie_title","num_voted_users","plot_keywords","num_user_for_reviews","language","country","content_rating","budget","title_year","imdb_score"]
@@ -168,19 +180,21 @@ def prepData():
 	df1['country']=df1['country'].astype('category')
 	df1['genres']=df1['genres'].astype('category')
 	df1['content_rating']=df1['content_rating'].astype('category')
-	df1 = parseGenres(df1)
+	# df1 = parseGenres(df1)
 	df1=rankMovies(df1)
 	
 	df1=df1.dropna(axis=0,how='any')
 	ndf=df1.apply(pd.to_numeric,errors='coerce') #Each row among all columns will be ocnverted to numeric type names-> NAN issue with dates tho
 	ndf=ndf.drop(['title_year','director_name','actor_1_name','actor_2_name','genres','plot_keywords','movie_title','content_rating','director_facebook_likes','country','language'],1)
 	
+	return df1
 	# ndf=ndf.dropna(axis=0,how='any')		
 	#df1=createDirScore(df1)
-	return df1.to_json()
+	# createDirGross(df1)
+	# return df1.to_json()
 
 
-prepData()
+# prepData()
 
 #sorted_x = sorted(dirdi.items(), key=operator.itemgetter(1))
 #print sorted_x
