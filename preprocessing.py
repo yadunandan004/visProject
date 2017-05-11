@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -13,17 +12,17 @@ client=MongoClient()
 client = MongoClient('mongodb://localhost:27017')
 db = client['pymongo_test']
 posts=db.posts
-post_data={
-	'id':'test123',
-	'test':'this is just a test phrase'
-}
-result=posts.insert_one(post_data)
-print('One post: {0}'.format(result.inserted_id)) 
-#trying to answer the question what makes a movie good?
+# post_data={
+# 	'id':'test123',
+# 	'test':'this is just a test phrase'
+# }
+# result=posts.insert_one(post_data)
+# print('One post: {0}'.format(result.inserted_id)) 
+# #trying to answer the question what makes a movie good?
 
 
-bills_post = posts.find_one({'id': 'test123'})
-print(bills_post)
+# bills_post = posts.find_one({'id': 'test123'})
+# print(bills_post)
 #print(df1)
 # def createCSV(data_frame,filename):
 #     data_frame.columns=["director_name","num_critic_for_reviews","duration","director_facebook_likes","actor_2_name","actor_1_facebook_likes","gross","genres","actor_1_name","movie_title","num_voted_users","cast_total_facebook_likes","plot_keywords","num_user_for_reviews","language","country","content_rating","budget","title_year","actor_2_facebook_likes","imdb_score","movie_facebook_likes"]
@@ -64,6 +63,13 @@ def rankMovies(df): #ranking movies based on imdb score
 	df.loc[df['imdb_score']>qt[2],'rank']=4
 	df.loc[(df['imdb_score']<=qt[2]) &(df['imdb_score']>qt[1]),'rank']=3
 	df.loc[(df['imdb_score']<=qt[1]) &(df['imdb_score']>qt[0]),'rank']=2
+	return df
+def classMovies(df): #ranking movies based on budget score
+	df['class']=np.ones(len(df))
+	qt=df['budget'].quantile([0.25,0.5,0.75]).values
+	df.loc[df['budget']>qt[2],'class']=4
+	df.loc[(df['budget']<=qt[2]) &(df['budget']>qt[1]),'class']=3
+	df.loc[(df['budget']<=qt[1]) &(df['budget']>qt[0]),'class']=2
 	return df
 
 def sampling(df,fraction):	#sampling based on imdb scores
@@ -106,34 +112,6 @@ def get_loadings(n,comp,df):
 	temp.sort(key=operator.itemgetter('ssl'),reverse=True)
 	print temp
 
-def createDirScore(df1):
-	dircat= df1.groupby(['rank'])['director_name'].value_counts()
-	direc = df1['director_name'].value_counts()
-	dnames=direc.keys()
-	# print dircat.ix[4]['Steven Spielberg']
-	dirdi={}
-	for i in range(1,5):
-		counts=dircat.ix[i]
-		names=dircat.ix[i].keys()
-		for j in range(len(counts)):
-			if dirdi.has_key(names[j]) is False:
-				dirdi[names[j]]=0
-				dirdi[names[j]]+=counts[j]*math.pow(i,i)
-				
-
-	df1['director_score']=1
-	# print df1['director_name'][0]
-	# for i in range(len(dnames)):
-	# 	# if direc.ix[i]<=2:
-	# 		dirdi[dnames[i]]=float(dirdi[dnames[i]])/direc.ix[i]
-
-	i=0
-	for name in df1['director_name']:
-	 	if dirdi.has_key(name):
-	 		df1.loc[i,'director_score']=dirdi[name]
-	 	i+=1
- 	print df1.ix[df1["rank"]==4,"direc"]
- 	return df1
 
 
 
@@ -155,6 +133,7 @@ def prepData():
 	df1=df.drop(["movie_imdb_link","color","aspect_ratio","actor_3_facebook_likes","actor_3_name","facenumber_in_poster"],axis=1)
 	df1=df1.drop_duplicates()
 	#df1=df1.dropna(axis=0,subset=headers)   #if you want to drop all missing values, has ~3780 entries
+	df1= df1.replace(0,'nan')
 	df1=df1.dropna(axis=0,subset=crucialHeaders)   #drop missing values based on selected columns
 	df1=df1[df1.country!="Official site"]
 
@@ -162,6 +141,7 @@ def prepData():
 	df1=df1.replace("Not Rated","Unrated")
 	df1=df1.replace("GP","PG")
 	df1=df1.replace("M","PG")
+	df1=df1[df1["country"]=="USA"]
 	#converting categorical data to numerical (unsure what to do for genres,movie title, names and movie plot)
 	x=list(df1.apply(set)["country"]) #budget and gross are adjusted already to US$
 	for index,item in enumerate(x):
@@ -182,19 +162,31 @@ def prepData():
 	df1['content_rating']=df1['content_rating'].astype('category')
 	# df1 = parseGenres(df1)
 	df1=rankMovies(df1)
-	
+	df1=classMovies(df1)
 	df1=df1.dropna(axis=0,how='any')
-	ndf=df1.apply(pd.to_numeric,errors='coerce') #Each row among all columns will be ocnverted to numeric type names-> NAN issue with dates tho
-	ndf=ndf.drop(['title_year','director_name','actor_1_name','actor_2_name','genres','plot_keywords','movie_title','content_rating','director_facebook_likes','country','language'],1)
-	
+	# ndf=df1.apply(pd.to_numeric,errors='coerce') #Each row among all columns will be ocnverted to numeric type names-> NAN issue with dates tho
+	# ndf=ndf.drop(['title_year','director_name','actor_1_name','actor_2_name','genres','plot_keywords','movie_title','content_rating','director_facebook_likes','country','language'],1)
+	# post_data={}
+	# for col in list(df1):
+	# 	post_data[col]=df1[col]
+	# # print post_data['imdb_score']
+	# return post_data
 	return df1
 	# ndf=ndf.dropna(axis=0,how='any')		
 	#df1=createDirScore(df1)
 	# createDirGross(df1)
 	# return df1.to_json()
-
-
 # prepData()
+# post_data={
+# 	'dataId':'moviedb1',
+# 	'dataframe':prepData()
+# }
+# data = posts.find_one({'dataId': 'moviedb1'})
+# # print data
+# if(data is None):
+# 	result=posts.insert_one(post_data)
+# 	print('One post: {0}'.format(result.inserted_id)) 
+# print prepData()
 
 #sorted_x = sorted(dirdi.items(), key=operator.itemgetter(1))
 #print sorted_x
