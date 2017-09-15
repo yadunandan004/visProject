@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<!-- <script src="http://d3js.org/d3.v3.min.js"></script> -->
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <!-- <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script> -->
+  <!-- <script src="d3.legend.js"></script> -->
+		<style>
+body {
+  font: 18px sans-serif;
+}
+.axis .domain {
+  display: none;
+}
+.bar{
+    stroke:none;
+    fill: steelblue
+}
+.arc text {
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+.legend rect {
+  fill:white;
+  stroke:black;}
+.arc path {
+  stroke: #fff;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.toolTip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  border: 1px solid #6F257F;
+  padding: 14px;
+  text-align: center;
+}
+.legend {
+        font-size: 12px;
+      }
+      rect {
+        stroke-width: 2;
+      }      
+.dot {
+  stroke: #000;
+}
+
+
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="jumbotron">
+    <h1>Movie Data Visualisation</h1> 
+    <p>Gives insight to a producer as to what makes a movie click with the audience.</p>
+    <ul class="list-group">
+    <li class="list-group-item"><h4>Manisha Mishra</h4></li>
+    <li class="list-group-item"><h4>Yadu Nandan</h4></li>
+  </ul> 
+  </div>
+  
+</div>
+<div class="container" id="intro">
+    <h3>Introduction</h3>
+    <p>Hello!!, we embark on this project to analyse the dataset based on Movies. We obtained the data courtesy of IMDB.
+    The dataset we are dealing with contains rouchly 5000 observations and 28 different features.As you can guess, the core features are Directors,Actors, Budget, Gross , IMDB score and so on. We have used some features based on their relevancy to the goal.</p>
+    <p><strong>Goal:</strong> So our goal is to analyse which are the factors that affect the box office collection the most. We choose this as our end goal because this is roughly the measure of whether a movie clicks with the general audience or not.Something which producers will be looking forward to.</p>
+    <p>So, without much ado we'll start!</p>
+</div>
+<div class="container" id="introbtn">
+<button type="button" class="btn btn-lg btn-success col-md-4 col-md-offset-3" id="startbar">Start!</button>
+</div>
+<div class="container" id="bar1">
+  <hr />
+    <h3>Quality vs Budget</h3>
+    <p>Here we can view the effects of quality and budget on the profit made by a movie. So here we have seperated movies based on two attributes, Quality and Budget. Essentially we considered the quantile of 'IMDB score' for Quality ranks, and quantile of 'Budget' for different budget classes. Hence we essentially come accross 4 diffrent categories for each.</p>
+    <p>Based on the plot shown below we can see that, if the quality of the movie is bad (Rank 1: Leftmost bar) it is the budget that helps to make profit. As the quality of the movie becomes better, it will have much more impact on the profit, compared to just budget(Rank 4: Rightmost  bar).</p>
+    <svg id="svgplot1" width="960" height="500"></svg>
+</div>
+
+<div class="container" id="dirbtncon">
+    <hr />
+    <h4><strong>In the next section well consider the quality factor in detail..</strong></h4>
+    <button type="button" class="btn btn-lg btn-primary col-md-4 col-md-offset-3" id="dirbtn">Quality</button>
+</div>
+<div class="container" id="scatter1">
+    <hr />
+    <h3>Director vs Gross</h3>
+    <p> Here we managed to create a score for each director based on the number of times he directed a movie of a particular Rank (Rank 1:Low to Rank 4 : High). Then we plot the score against the average Movie gross of the director. So, analysing the graph we see that as the score of the director increases (indicating better quality) the average Gross of the director increases as well.</p>
+    <p><strong>We see stacked circles on top of another, as the directors have made same number of movies (usually 1) belonging to a particular rank.</strong></p>
+    <svg id="svgplot2" width="1080" height="500"></svg>
+</div>
+
+<div class="container" id="scatter2">
+<hr />
+  <h3>Actor vs Gross</h3>
+    <p> Similarly Here we managed to create a score for each Lead Actor based on the number of times he acted in a movie of a particular Rank (Rank 1:Low to Rank 4 : High) and also considering his popularity via his Facebook likes. Then we plot the score against the average Movie gross of the actor. Although being vague, analysing the graph we see that as the score of the actor increases (indicating better quality) the average Gross of the actor increases as well. </p>
+    <p><strong>We see stacked circles on top of another, as the Actors have made same number of movies (usually 1) belonging to a particular rank.</strong></p>
+    <svg id="svgplot3" width="1080" height="500"></svg>
+</div>
+
+<div class="container" id="rateCon">
+    <hr />
+    <button type="button" class="btn btn-lg btn-warning col-md-4 col-md-offset-3" id="ratebtn">Rating Effect</button>
+</div>
+
+<div class="container" id="pie1Con">
+    <hr />
+    <h3>Rating vs Gross</h3>
+    <p>Here we try to analyse what Rating or Movie Certificates like PG-13, R have their effect on the movie gross.We can see that Fairly broad Ratings like 'PG' or 'PG-13' or 'G' are the way to go. As they find wider audience. 'R' or 'NC-17' being meant for adults consequently find much lower audience. </p>
+    <svg id="svgplot4" width="960" height="500"></svg>
+</div>
+
+<div class="container" id ="restbtncon">
+<hr />
+    <button type="button" class="btn btn-lg btn-primary col-md-4 col-md-offset-3" id="restbtn">Other Insights</button>
+</div>
+
+<div class="container" id="groupedbar">
+  <hr />
+    <h3>Class of Movies Vs Count over years</h3>
+    <p>Here we see the different Ranks of movies shown in various time frames</p>
+    <p>Rank 1: Very good</p>
+    <p>Rank 4: bad</p>
+    <svg id="svgplot5" width="960" height="500"></svg>
+</div>
+
+<div class="container" id="stackedbar">
+<hr />
+<h3>Class of Movies Vs Count over Budget</h3>
+    <p>Here we see the different Ranks of movies shown in various budget categories. There are lot of Rank 1 movies under low budget.Hence, as we can see as the budget increases, the overall quality of the movies increases.</p>
+    <p>Rank 1: Very good</p>
+    <p>Rank 4: bad</p>
+    <svg id="svgplot6" width="960" height="500"></svg>
+</div>
+<div class="container" id="end1">
+<hr />
+    <!-- <button type="button" class="btn btn-lg btn-danger col-md-4 col-md-offset-3" id="end1btn">Popularity of Genres</button>
+
+ -->
+<h3>Conclusion</h1>
+<p>Hence we conclude that with optimal budget and selecting a really good director and Actor combo and making the movie based on a popular Genre such as action can be suited to make the best amount of proit and click with the audience really well.</p>
+ </div>
+<script type="text/javascript">
+$(document).ready(function(){
+
+  $("#dirbtn").hide();
+  $("#bar1").hide();
+  $("#ratebtn").hide();
+  $("#dirbtncon").hide();
+  $("#scatter1").hide();
+  $("#scatter2").hide();
+  $("#rateCon").hide();
+  $("#pie1Con").hide();
+  $("#restbtncon").hide();
+  $("#groupedbar").hide();
+  $("#stackedbar").hide();
+  $("#end1").hide();
+    $("#startbar").click(function(){
+
+    $.get("http://localhost:5000/getData1",function(data){
+       var res=[]
+       data=JSON.parse(data);
+       for (var i=1;i<=4;i++)
+       {
+          res.push({rank:data.rank[i],budget:data.budget[i],category:"cat"+i});
+       }
+       res['columns']=['rank','budget'];
+       $("#bar1").show();
+        drawBarchart(res);
+          $("#dirbtncon").show();
+        $("#dirbtn").show()
+    });
+  });
+    $("#dirbtn").click(function(){
+        $("#scatter1").show();
+
+        $.get("http://localhost:5000/getdirData",function(data){
+            data=JSON.parse(data);
+            temp=[]
+            arr=Object.values(data)
+            for(var i=0;i<arr.length;i++)
+            {
+              temp.push({x:arr[i]['score'],y:arr[i]['gross']});
+            }
+            // console.log(temp);
+
+            drawScatterPlot(temp,"#svgplot2","blue");
+        })
+        $("#scatter2").show();
+        $.get("http://localhost:5000/getacData",function(data){
+            data=JSON.parse(data);
+            temp=[]
+            arr=Object.values(data)
+            for(var i=0;i<arr.length;i++)
+            {
+              temp.push({x:arr[i]['score'],y:arr[i]['gross']});
+            }
+            // console.log(temp);
+            drawScatterPlot(temp,"#svgplot3","red");
+            $("#ratebtn").show();
+            $("#rateCon").show();
+        })
+    });
+    $("#ratebtn").click(function(){
+      $("#pie1Con").show();
+        $.get("http://localhost:5000/getrateData",function(data){
+            data=JSON.parse(data);
+            // console.log(data)
+            var res=[]
+            for(var i=0;i<data.gross.length;i++)
+            {
+              res.push({count:data.gross[i],label:data.ratings[i]});
+            }
+            drawPieChart2(res);
+            $("#restbtncon").show();
+        })
+    })
+    $("#restbtn").click(function(){
+      $("#groupedbar").show();
+      $("#stackedbar").show();
+        drawgrouped();
+        drawStacked();
+        $("#end1").show();
+    });
+    })
+function preProcess(tData)
+  {
+    
+    //console.log(tData);
+    var rData={};
+         rData['x']=tData['x'];
+         rData['y']=tData['y'];
+         //console.log(rData);
+         //console.log(rData['type']);
+         var n=Object.values(rData['x']).length;
+          // console.log(rData['x']);
+         var mData =[];
+         for(let i=0;i<n;i++)
+         {
+          //console.log(parseInt(rData['x'][i]));
+          if((typeof rData['x'][i]!== "undefined")&&(typeof rData['y'][i]!=="undefined"))
+          {
+              // if(rData['x'][i]<=0)
+              // {
+              //   console.log(rData['x'][i]+":"+i);
+              // }
+              if((rData['x'][i]!== null)&&(rData['y'][i]!==null))
+              {
+                mData.push({'x':rData['x'][i],'y':rData['y'][i]});
+              }
+              
+          }
+          
+         }
+          //console.log(mData);
+         return mData;
+  }
+function drawBarchart(data)
+  {
+        
+      var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+        var svg = d3.select("#svgplot1"),
+        margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x0 = d3.scaleBand()
+        .rangeRound([0, width])
+        .paddingInner(0.1);
+
+    var x1 = d3.scaleBand()
+        .padding(0.05);
+
+    var y = d3.scaleLinear()
+        .rangeRound([height, 0]);
+
+    var z = d3.scaleOrdinal()
+        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+  
+      var keys = data.columns.slice(0);
+      x0.domain(data.map(function(d) { return d.category; }));
+      x1.domain(keys).rangeRound([0, x0.bandwidth()]);
+      y.domain([0, d3.max(data, function(d) { return d3.max(keys, function(key) { return d[key]; }); })]).nice();
+
+      g.append("g")
+        .selectAll("g")
+        .data(data)
+        .enter().append("g")
+          .attr("transform", function(d) { return "translate(" + x0(d.category) + ",0)"; })
+        .selectAll("rect")
+        .data(function(d) { return keys.map(function(key) {return {key: key, value: d[key]}; }); })
+        .enter().append("rect")
+          .attr("x", function(d) { return x1(d.key); })
+          .attr("y", function(d) { return y(d.value); })
+          .attr("width", x1.bandwidth())
+          .attr("height", function(d) { return height - y(d.value); })
+          .attr("fill", function(d) { return z(d.key); })
+          .on("mousemove", function(d){
+            // var newHeight = parseInt(this.getBBox().height)*1.1 + "px";
+            // var newy = parseInt(this.getBBox().y)* + "px";
+            // // // console.log();
+            // d3.select(this)
+            //   .attr("y",newy)
+            //   .style("height", newHeight);
+            console.log(this.getBBox());
+            tooltip
+              .style("left", d3.event.pageX - 50 + "px")
+              .style("top", d3.event.pageY - 70 + "px")
+              .style("display", "inline-block")
+              .html(d.value);
+        })
+        .on("mouseout", function(d){ tooltip.style("display", "none");});
+      g.append("g")
+          .attr("class", "axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x0));
+
+      g.append("g")
+          .attr("class", "axis")
+          .call(d3.axisLeft(y).ticks(null, "s"))
+        .append("text")
+          .attr("x", 2)
+          .attr("y", y(y.ticks().pop()) + 0.5)
+          .attr("dy", "0.32em")
+          .attr("fill", "#000")
+          .attr("font-weight", "bold")
+          .attr("text-anchor", "start")
+          .text("Profit");
+
+      var legend = g.append("g")
+          .attr("font-family", "sans-serif")
+          .attr("font-size", 10)
+          .attr("text-anchor", "end")
+        .selectAll("g")
+        .data(keys.slice().reverse())
+        .enter().append("g")
+          .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+      legend.append("rect")
+          .attr("x", width - 19)
+          .attr("width", 19)
+          .attr("height", 19)
+          .attr("fill", z);
+
+      legend.append("text")
+          .attr("x", width - 24)
+          .attr("y", 9.5)
+          .attr("dy", "0.32em")
+          .text(function(d) { return d; });
+  }
+
+function drawScatterPlot(data,id,col)
+  {
+    
+    var svg = d3.select(id),
+        margin = {top: 20, right: 40, bottom: 30, left: 160},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var xv=function(d){return d.x;};
+    var yv=function(d){return d.y;};
+    var xScale = d3.scaleLinear().rangeRound([100, width]),
+    yScale = d3.scaleLinear().rangeRound([height, 0]);
+    xScale.domain([d3.min(data,xv),d3.max(data,xv)]);
+    yScale.domain([d3.min(data,yv),d3.max(data,yv)]);
+    svg.append("g")
+    // .attr("class","x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(xScale))
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .style("font-size", "14px")
+      .text("Score");
+      svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(70, 50)")
+        .call(d3.axisLeft(yScale))
+        .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".50em")
+      .style("text-anchor", "end")
+      .style("font-size", "14px")
+      .text("Movie Gross");
+
+    svg.selectAll("circle")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("r",3)
+    .attr("cx",function(d,i){if(typeof d.x!=="undefined"){return xScale(d.x);}})
+    .attr("cy",function(d){if(typeof d.y!=="undefined"){return yScale(d.y);}})
+    .attr("fill",col)
+    .attr("stroke","black");
+
+  }
+function drawPieChart2(dataset){
+  var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+  var width = 600;
+        var height = 600;
+        var radius = Math.min(width, height) / 2;
+        var donutWidth = 100;
+        var legendRectSize = 18;
+        var legendSpacing = 4;
+        var label = d3.arc()
+    .outerRadius(radius - 40)
+    .innerRadius(radius - 40);
+        var color = d3.scaleOrdinal(d3.schemeCategory20);
+          var svg = d3.select('#svgplot4')
+          .attr('width', width)
+          .attr('height', height)
+          .append('g')
+          .attr('transform', 'translate(' + (width / 2) + 
+            ',' + (height / 2) + ')');
+
+        var arc = d3.arc()
+          .innerRadius(radius - donutWidth)
+          .outerRadius(radius);
+
+        var pie = d3.pie()
+          .value(function(d) { return d.count; })
+          .sort(null);
+
+          var path = svg.selectAll('path')
+            .data(pie(dataset))
+            .enter()
+            .append('path')
+            .attr('d', arc)
+            .attr('fill', function(d, i) { 
+              return color(d.data.label); 
+            })   
+            .on("mousemove", function(d){
+            tooltip
+              .style("left", d3.event.pageX - 50 + "px")
+              .style("top", d3.event.pageY - 70 + "px")
+              .style("display", "inline-block")
+              .html(parseInt(d.value));
+        })
+        .on("mouseout", function(d){ tooltip.style("display", "none");});;                                                     // NEW
+          path.append("text")
+          .attr("transform", function(d) { return "translate(" + label.centroid(d) + ")"; })
+          .attr("dy", "0.35em")
+          .text(function(d) {return parseInt(d.value); });
+          /* OPTIONAL 
+          path.on('mousemove', function(d) {                            // NEW
+            tooltip.style('top', (d3.event.pageY + 10) + 'px')          // NEW
+              .style('left', (d3.event.pageX + 10) + 'px');             // NEW
+          });                                                           // NEW
+          */
+            
+          var legend = svg.selectAll('.legend')
+            .data(color.domain())
+            .enter()
+            .append('g')
+            .attr('class', 'legend')
+            .attr('transform', function(d, i) {
+              var height = legendRectSize + legendSpacing;
+              var offset =  height * color.domain().length / 2;
+              var horz = -2 * legendRectSize;
+              var vert = i * height - offset;
+              return 'translate(' + horz + ',' + vert + ')';
+            });
+
+          legend.append('rect')
+            .attr('width', legendRectSize)
+            .attr('height', legendRectSize)                                   
+            .style('fill', color)
+            .style('stroke', color);
+            
+          legend.append('text')
+            .attr('x', legendRectSize + legendSpacing)
+            .attr('y', legendRectSize - legendSpacing)
+            .text(function(d,i) { return d; });
+
+        // });
+}
+function drawgrouped()
+{
+  var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+  var svg = d3.select("#svgplot5");
+var margin = {top: 20, right: 20, bottom: 30, left: 40};
+var width = +svg.attr("width") - margin.left - margin.right;
+var height = +svg.attr("height") - margin.top - margin.bottom;
+var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var x0 = d3.scaleBand()
+    .rangeRound([0, width])
+    .paddingInner(0.1);
+
+var x1 = d3.scaleBand()
+    .padding(0.05);
+
+var y = d3.scaleLinear()
+    .rangeRound([height, 0]);
+
+var z = d3.scaleOrdinal()
+    .range(["#6b486b","#a05d56", "#d0743c", "#ff8c00"]);
+
+d3.csv("layered.csv", function(d, i, columns) {
+  for (var i = 1, n = columns.length; i < n; ++i) d[columns[i]] = +d[columns[i]];
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  var keys = data.columns.slice(1);
+
+  x0.domain(data.map(function(d) { return d.title_year; }));
+  x1.domain(keys).rangeRound([0, x0.bandwidth()]);
+  y.domain([0, d3.max(data, function(d) { return d3.max(keys, function(key) { return d[key]; }); })]).nice();
+
+  g.append("g")
+    .selectAll("g")
+    .data(data)
+    .enter().append("g")
+      .attr("transform", function(d) { return "translate(" + x0(d.title_year) + ",0)"; })
+    .selectAll("rect")
+    .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
+    .enter().append("rect")
+      .attr("x", function(d) { return x1(d.key); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("width", x1.bandwidth())
+      .attr("height", function(d) { return height - y(d.value); })
+      .attr("fill", function(d) { return z(d.key); })
+      .on("mousemove", function(d){
+            tooltip
+              .style("left", d3.event.pageX - 50 + "px")
+              .style("top", d3.event.pageY - 70 + "px")
+              .style("display", "inline-block")
+              .html(d.value);
+        })
+        .on("mouseout", function(d){ tooltip.style("display", "none");});;
+
+  g.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x0));
+
+  g.append("g")
+      .attr("class", "axis")
+      .call(d3.axisLeft(y).ticks(null, "s"))
+    .append("text")
+      .attr("x", 2)
+      .attr("y", y(y.ticks().pop()) + 0.5)
+      .attr("dy", "0.32em")
+      .attr("fill", "#000")
+      .attr("font-weight", "bold")
+      .attr("text-anchor", "start")
+      .text("Count");
+
+  var legend = g.append("g")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 15)
+      .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(keys.slice().reverse())
+    .enter().append("g")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 19)
+      .attr("width", 19)
+      .attr("height", 19)
+      .attr("fill", z);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9.5)
+      .attr("dy", "0.32em")
+      .text(function(d) { return d; });
+});
+
+}
+function drawStacked(){
+  // var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+  var svg = d3.select("#svgplot6"),
+    margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var x = d3.scaleBand()
+    .rangeRound([0, width])
+    .paddingInner(0.05)
+    .align(0.1);
+
+var y = d3.scaleLinear()
+    .rangeRound([height, 0]);
+
+var z = d3.scaleOrdinal()
+    .range(["#98abc5", "#7b6888", "#6b486b", "#d0743c"]);
+
+d3.csv("stacked.csv", function(d, i, columns) {
+  for (i = 1, t = 0; i < columns.length; ++i) t += d[columns[i]] = +d[columns[i]];
+  d.total = t;
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  var keys = data.columns.slice(1);
+
+  data.sort(function(a, b) { return b.total - a.total; });
+  x.domain(data.map(function(d) { return d.budget; }));
+  y.domain([0, d3.max(data, function(d) { return d.total; })]).nice();
+  z.domain(keys);
+
+  g.append("g")
+    .selectAll("g")
+    .data(d3.stack().keys(keys)(data))
+    .enter().append("g")
+      .attr("fill", function(d) { return z(d.key); })
+    .selectAll("rect")
+    .data(function(d) { return d; })
+    .enter().append("rect")
+      .attr("x", function(d) { return x(d.data.budget); })
+      .attr("y", function(d) { return y(d[1]); })
+      .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+      .attr("width", x.bandwidth());
+
+  g.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  g.append("g")
+      .attr("class", "axis")
+      .call(d3.axisLeft(y).ticks(null, "s"))
+    .append("text")
+      .attr("x", 2)
+      .attr("y", y(y.ticks().pop()) + 0.5)
+      .attr("dy", "0.32em")
+      .attr("fill", "#000")
+      .attr("font-weight", "bold")
+      .attr("text-anchor", "start")
+      .text("Number of Movies");
+
+  var legend = g.append("g")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+      .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(keys.slice().reverse())
+    .enter().append("g")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 19)
+      .attr("width", 19)
+      .attr("height", 19)
+      .attr("fill", z);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9.5)
+      .attr("dy", "0.32em")
+      .text(function(d) { return d; });
+});
+}
+</script>
+</body>
+</html>
